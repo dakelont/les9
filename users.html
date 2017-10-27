@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <title></title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+	  body, html {  height: 100% }
+      body { font: 14px Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 50%; margin: 0 0 0 -6px; }
+      form input { border: 0;    padding: 10px 70px 10px 10px;    width: 46%;    margin-right: .5%;    float: left; }
+      form button { width: 60px; right: 3px; background: #c5c5c5; border: none; padding: 10px; position: absolute; }      
+	  .user { width: 50%; height: 100%; background: #f5f5f5; padding: 3px; border: 3px solid #999; }
+	  #messages { list-style-type: none; margin:0; padding: 0; }     
+	  #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+	  #search {right: -60px;}
+    </style>
+  </head>
+  <body>
+  <div class="chat">
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" placeholder="Имя" autocomplete="off" /><input id="n" placeholder="Номер Телефона" autocomplete="off" /><input id="id" type="hidden" /><button id="save">Save</button><button id="search">Search</button>
+    </form>
+	</div>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+	<script>
+	  var socket = io();
+	  $('#save').click(function(){
+		var user = {};
+		user.name = $('#m').val();
+		user.phone = $('#n').val();
+		user.id = $('#id').val();
+		socket.emit('user message', user);
+		$('#m, #n, #id').val('');
+		return false;
+	  });
+	  
+	  $('#search').click(function(){
+		var user = {};
+		user.name = $('#m').val();
+		user.phone = $('#n').val();
+		console.log(user);
+		socket.emit('user search', user);
+		return false;
+	  });
+	  
+	  socket.on('user message', function(msg){
+		console.log(msg);
+		var text=[];
+		text.push('Имя: ' + msg.name);
+		text.push(' Телефон: ' + msg.phone);
+		text.push(' <span onclick="editItem({id:\'' + msg._id + '\', name:\'' + msg.name + '\', phone:\'' + msg.phone + '\'})">Редактировать</span>  <span onclick="delItem(\'' + msg._id + '\')">Удалить</span>');
+		if (msg.id!='') { 
+			$('#' + msg.id).html(text.join(''));
+		}
+		else $('#messages').append($('<li>').attr('id',msg._id).html(text.join('')));
+	  });
+	  socket.on('user remove', function(msg){
+		$('#' + msg.id).remove();
+	  });
+	  
+	  socket.emit('some event');
+	  
+	  socket.on('some event', function(msg){
+		  $(msg).each(function(indx, element){
+			var text=[];
+			text.push('Имя: ' + element.name);
+			text.push(' Телефон: ' + element.phone);
+			text.push('<span onclick="editItem({id:\'' + element._id + '\', name:\'' + element.name + '\', phone:\'' + element.phone + '\'})">Редактировать</span>  <span onclick="delItem(\'' + element._id + '\')">Удалить</span>');
+			$('#messages').append($('<li>').attr('id',element._id).html(text.join('')));
+		  });
+	  });
+	  
+	  function editItem(id) {
+		$('#m').val(id.name);
+		$('#n').val(id.phone);
+		$('#id').val(id.id);
+		return false;
+	  }
+	  function delItem(id) {
+		console.log(id);
+		socket.emit('user remove', {'id':id});
+	  }
+	</script>
+  </body>
+</html>
