@@ -64,6 +64,7 @@
 	  socket.emit('some event');
 	  
 	  socket.on('some event', function(msg){
+		$('#messages li').remove();
 		  $(msg).each(function(indx, element){
 			var text=[];
 			text.push('Имя: ' + element.name);

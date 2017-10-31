@@ -69,8 +69,9 @@ function mongoConnect(query) {
 				}
 			}
 			else if (query.search == 1) {
-				collection.find({name: {$regex: /query.name/i}, phone:{$regex: /query.phone/i}}, function(err, cursor) {
+				collection.find({name: {$regex: query.name, $options: 'i'}, phone:{$regex: query.phone, $options: 'i'}}, function(err, cursor) {
 				  cursor.toArray(function(err, items) {
+					console.log(items);
 						io.emit('some event', items);
 				  });
 				});

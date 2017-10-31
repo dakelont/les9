@@ -1,6 +1,6 @@
 {
   "name": "les9",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Все, что нужно знать про запросы в MongoDB",
   "main": "index.js",
   "scripts": {
